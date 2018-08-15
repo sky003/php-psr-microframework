@@ -6,6 +6,7 @@
         "middlewares/whoops": "^1.2"
     },
     "require-dev": {
-        "roave/security-advisories": "dev-master"
+        "roave/security-advisories": "dev-master",
+        "codeception/codeception": "^2.4"
     }
 }
