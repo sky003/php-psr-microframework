@@ -1,0 +1,18 @@
+version: '3'
+services:
+
+    web:
+        build:
+            context: ./env/docker/nginx
+        depends_on:
+            - php-fpm
+        ports:
+            - 8080:80
+
+    php-fpm:
+        build:
+            context: ./env/docker/php-fpm
+        volumes:
+            - ./:/var/www/app
+        environment:
+            - APP_ENV=dev
