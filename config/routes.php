@@ -8,6 +8,8 @@
  * @var \Symfony\Component\DependencyInjection\ContainerBuilder $containerBuilder
  */
 
+declare(strict_types = 1);
+
 use League\Route\RouteGroup;
 
 /** @var League\Route\Router $router */

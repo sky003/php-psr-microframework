@@ -6,6 +6,8 @@
  * for all environments (dev, test, prod and etc).
  */
 
+declare(strict_types = 1);
+
 use League\Route\Router;
 use Middlewares\Whoops;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
