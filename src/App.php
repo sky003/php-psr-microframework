@@ -51,7 +51,24 @@ class App
     /**
      * Runs the application.
      *
-     * This method handles a request, and sends a response.
+     * This method handles a request, and sends a response. In short, this method
+     * is responsible for dispatching.
+     *
+     * I've also thought about implementing the separated middleware queue, and
+     * just make the router to be part of this queue. But seems like it will take
+     * some time that I don't have right now, mainly because I can't find any
+     * implementation that I can use, and I need to build and test my own
+     * (see the links below).
+     *
+     * I decided to use "league/router" because it have friendly api, and can handle
+     * the invocation of a stack of middlewares which is very useful (useful to link
+     * middlewares and routes). "nikic/fast-route" package seems like doesn't provides
+     * this ability.
+     *
+     * Anyway, current implementation meet all the requirements, and it's gonna be not so
+     * hard to do some refactoring of this method in the future.
+     *
+     * @see https://github.com/middlewares/ideas/issues/15
      */
     public function run(): void
     {
