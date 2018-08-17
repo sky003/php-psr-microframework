@@ -2,14 +2,23 @@
 /**
  * Configures the router service.
  *
+ * This is also a good place to add the middlewares matched to the router,
+ * a router group, or a specific route.
+ *
  * @var \Symfony\Component\DependencyInjection\ContainerBuilder $containerBuilder
  */
 
-use League\Route\Router;
+use League\Route\RouteGroup;
 
-/** @var Router $router */
+/** @var League\Route\Router $router */
 $router = $containerBuilder->get('router');
+/** @var Middlewares\Whoops $errorHandlerMiddleware */
+$errorHandlerMiddleware = $containerBuilder->get('middleware.error_handler');
 
-$router->map('GET', '/', 'App\Controller\IndexController::getIndex');
+$router
+    ->group('/api/v1', function (RouteGroup $router) {
+        $router->map('GET', '/', 'App\Controller\IndexController::getIndex');
+    })
+    ->middleware($errorHandlerMiddleware);
 
 return $router;

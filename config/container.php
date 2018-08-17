@@ -7,12 +7,17 @@
  */
 
 use League\Route\Router;
+use Middlewares\Whoops;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 $containerBuilder = new ContainerBuilder();
 
 $containerBuilder
     ->register('router', Router::class)
+    ->setPublic(true);
+
+$containerBuilder
+    ->register('middleware.error_handler', Whoops::class)
     ->setPublic(true);
 
 return $containerBuilder;
