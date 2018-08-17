@@ -31,9 +31,9 @@ class App
      *
      * @param ContainerBuilder $containerBuilder
      */
-    public function __construct(ContainerBuilder $containerBuilder)
+    public function __construct(?ContainerBuilder $containerBuilder = null)
     {
-        $this->containerBuilder = $containerBuilder;
+        $this->containerBuilder = $containerBuilder ?? new ContainerBuilder();
 
         $this->initializeContainer();
     }
