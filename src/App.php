@@ -5,12 +5,10 @@ namespace App;
 
 use League\Route\Router;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Whoops\Run as WhoopsRun;
-use Zend\Diactoros\ServerRequest;
-use Zend\Diactoros\ServerRequestFactory;
-use Zend\HttpHandlerRunner\Emitter\SapiEmitter;
 
 /**
  * Application class.
@@ -71,39 +69,32 @@ class App
      * Anyway, current implementation meet all the requirements, and it's gonna be not so
      * hard to do some refactoring of this method in the future.
      *
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     *
      * @see https://github.com/middlewares/ideas/issues/15
      */
-    public function run(): void
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
         /** @var WhoopsRun $whoops */
         $whoops = $this->getContainer()->get('whoops');
-        /** @var ServerRequestInterface $request */
-        $request = $this->getContainer()->get('request');
         /** @var Router $router */
         $router = $this->getContainer()->get('router');
 
         $whoops->register();
-        $response = $router->dispatch($request);
-        (new SapiEmitter())->emit($response);
+
+        return $router->dispatch($request);
     }
 
     /**
      * Initializes the container.
      *
      * Here's the necessary minimum of dependencies to make this application runnable.
-     * Right now the minimum necessary set of dependencies is: the request, the error handler,
+     * Right now the minimum necessary set of dependencies is: the error handler,
      * and the router.
      */
     private function initializeContainer(): void
     {
-        if (!$this->containerBuilder->has('request')) {
-            $this->containerBuilder
-                ->register('request', ServerRequest::class)
-                ->setFactory([ServerRequestFactory::class, 'fromGlobals',])
-                ->setPublic(true)
-                ->addTag('core');
-        }
-
         if (!$this->containerBuilder->has('whoops')) {
             $this->containerBuilder
                 ->register('whoops', WhoopsRun::class)
