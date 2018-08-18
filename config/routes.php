@@ -12,15 +12,12 @@ declare(strict_types = 1);
 
 use League\Route\RouteGroup;
 
-/** @var League\Route\Router $router */
+/** @var \League\Route\Router $router */
 $router = $containerBuilder->get('router');
-/** @var Middlewares\Whoops $errorHandlerMiddleware */
-$errorHandlerMiddleware = $containerBuilder->get('middleware.error_handler');
 
 $router
     ->group('/api/v1', function (RouteGroup $router) {
         $router->map('GET', '/', 'App\Controller\IndexController::getIndex');
-    })
-    ->middleware($errorHandlerMiddleware);
+    });
 
 return $router;

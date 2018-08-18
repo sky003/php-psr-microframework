@@ -7,6 +7,7 @@ use League\Route\Router;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Whoops\Run as WhoopsRun;
 use Zend\Diactoros\ServerRequest;
 use Zend\Diactoros\ServerRequestFactory;
 use Zend\HttpHandlerRunner\Emitter\SapiEmitter;
@@ -74,13 +75,15 @@ class App
      */
     public function run(): void
     {
+        /** @var WhoopsRun $whoops */
+        $whoops = $this->getContainer()->get('whoops');
         /** @var ServerRequestInterface $request */
         $request = $this->getContainer()->get('request');
         /** @var Router $router */
         $router = $this->getContainer()->get('router');
 
+        $whoops->register();
         $response = $router->dispatch($request);
-
         (new SapiEmitter())->emit($response);
     }
 

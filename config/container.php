@@ -9,17 +9,29 @@
 declare(strict_types = 1);
 
 use League\Route\Router;
-use Middlewares\Whoops;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Reference;
+use Whoops\Handler\JsonResponseHandler;
+use Whoops\Run as WhoopsRun;
 
 $containerBuilder = new ContainerBuilder();
 
+// Router
 $containerBuilder
     ->register('router', Router::class)
-    ->setPublic(true);
+    ->setPublic(true)
+    ->addTag('core');
 
+// Error handler
 $containerBuilder
-    ->register('middleware.error_handler', Whoops::class)
-    ->setPublic(true);
+    ->register('whoops', WhoopsRun::class)
+    ->addMethodCall('pushHandler', [new Reference('whoops.handler.json_response_handler')])
+    ->setPublic(true)
+    ->addTag('core')
+    ->addTag('whoops');
+$containerBuilder
+    ->register('whoops.handler.json_response_handler', JsonResponseHandler::class)
+    ->setPublic(true)
+    ->addTag('whoops');
 
 return $containerBuilder;
