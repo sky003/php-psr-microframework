@@ -91,6 +91,8 @@ class App
      * Initializes the container.
      *
      * Here's the necessary minimum of dependencies to make this application runnable.
+     * Right now the minimum necessary set of dependencies is: the request, the error handler,
+     * and the router.
      */
     private function initializeContainer(): void
     {
@@ -98,13 +100,22 @@ class App
             $this->containerBuilder
                 ->register('request', ServerRequest::class)
                 ->setFactory([ServerRequestFactory::class, 'fromGlobals',])
-                ->setPublic(true);
+                ->setPublic(true)
+                ->addTag('core');
+        }
+
+        if (!$this->containerBuilder->has('whoops')) {
+            $this->containerBuilder
+                ->register('whoops', WhoopsRun::class)
+                ->setPublic(true)
+                ->addTag('core');
         }
 
         if (!$this->containerBuilder->has('router')) {
             $this->containerBuilder
                 ->register('router', Router::class)
-                ->setPublic(true);
+                ->setPublic(true)
+                ->addTag('core');
         }
 
         $this->containerBuilder->compile();
