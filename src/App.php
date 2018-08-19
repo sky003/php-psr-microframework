@@ -3,12 +3,17 @@ declare(strict_types = 1);
 
 namespace App;
 
+use League\BooBoo\BooBoo;
+use League\BooBoo\Formatter\JsonFormatter;
+use League\Route\Http\Exception as RouterHttpErrorException;
 use League\Route\Router;
+use Middlewares\Utils\HttpErrorException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Whoops\Run as WhoopsRun;
+use Symfony\Component\DependencyInjection\Reference;
+use Zend\Diactoros\Response;
 
 /**
  * Application class.
@@ -76,14 +81,20 @@ class App
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        /** @var WhoopsRun $whoops */
-        $whoops = $this->getContainer()->get('whoops');
+        /** @var BooBoo $booBoo */
+        $booBoo = $this->getContainer()->get('booboo');
         /** @var Router $router */
         $router = $this->getContainer()->get('router');
 
-        $whoops->register();
+        $booBoo->register();
 
-        return $router->dispatch($request);
+        try {
+            $response = $router->dispatch($request);
+        } catch (HttpErrorException | RouterHttpErrorException $exception) {
+            return $this->handleError($exception);
+        }
+
+        return $response;
     }
 
     /**
@@ -95,9 +106,14 @@ class App
      */
     private function initializeContainer(): void
     {
-        if (!$this->containerBuilder->has('whoops')) {
+        if (!$this->containerBuilder->has('booboo')) {
             $this->containerBuilder
-                ->register('whoops', WhoopsRun::class)
+                ->register('booboo.json_formatter', JsonFormatter::class)
+                ->setPublic(true)
+                ->addTag('core');
+            $this->containerBuilder
+                ->register('booboo', BooBoo::class)
+                ->setArgument('$formatters', [new Reference('booboo.json_formatter')])
                 ->setPublic(true)
                 ->addTag('core');
         }
@@ -110,5 +126,34 @@ class App
         }
 
         $this->containerBuilder->compile();
+    }
+
+    /**
+     * Handles the http errors.
+     *
+     * @param \Exception $exception
+     *
+     * @return ResponseInterface
+     */
+    private function handleError(\Exception $exception): ResponseInterface
+    {
+        if ($exception instanceof RouterHttpErrorException
+            || $exception instanceof HttpErrorException) {
+            /** @var JsonFormatter $jsonFormatter */
+            $jsonFormatter = $this->getContainer()->get('booboo.json_formatter');
+
+            $response = new Response();
+            $response->getBody()->write($jsonFormatter->format($exception));
+
+            $statusCode = $exception instanceof HttpErrorException
+                ? $exception->getCode()
+                : $exception->getStatusCode();
+
+            return $response
+                ->withStatus($statusCode)
+                ->withHeader('Content-Type', 'application/json');
+        }
+
+        throw $exception;
     }
 }

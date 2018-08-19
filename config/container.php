@@ -8,11 +8,11 @@
 
 declare(strict_types = 1);
 
+use League\BooBoo\BooBoo;
+use League\BooBoo\Formatter\JsonFormatter;
 use League\Route\Router;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
-use Whoops\Handler\JsonResponseHandler;
-use Whoops\Run as WhoopsRun;
 
 $containerBuilder = new ContainerBuilder();
 
@@ -24,14 +24,13 @@ $containerBuilder
 
 // Error handler
 $containerBuilder
-    ->register('whoops', WhoopsRun::class)
-    ->addMethodCall('pushHandler', [new Reference('whoops.handler.json_response_handler')])
+    ->register('booboo.json_formatter', JsonFormatter::class)
     ->setPublic(true)
-    ->addTag('core')
-    ->addTag('whoops');
+    ->addTag('core');
 $containerBuilder
-    ->register('whoops.handler.json_response_handler', JsonResponseHandler::class)
+    ->register('booboo', BooBoo::class)
+    ->setArgument('$formatters', [new Reference('booboo.json_formatter')])
     ->setPublic(true)
-    ->addTag('whoops');
+    ->addTag('core');
 
 return $containerBuilder;
