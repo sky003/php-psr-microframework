@@ -28,23 +28,23 @@ final class App extends Framework
     /**
      * {@inheritdoc}
      */
-    public function _initialize(): void // phpcs:ignore
-    {
-        $this->initializeContainer();
-        $this->app = new \App\App($this->container);
-
-        parent::_initialize();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function _before(TestInterface $test): void // phpcs:ignore
     {
+        $this->initializeApp();
+
         $this->client = new Connector();
         $this->client->setApp($this->app);
 
         parent::_before($test);
+    }
+
+    /**
+     * Initializes the application.
+     */
+    private function initializeApp(): void
+    {
+        $this->initializeContainer();
+        $this->app = new \App\App($this->container);
     }
 
     /**
@@ -57,7 +57,7 @@ final class App extends Framework
         $routesFile = \codecept_root_dir().$this->config['routes'];
 
         $this->container = require $containerFile;
-        require_once $testContainerFile;
-        require_once $routesFile;
+        require $testContainerFile;
+        require $routesFile;
     }
 }
