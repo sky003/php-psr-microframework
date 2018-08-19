@@ -8,5 +8,9 @@
 actor: FunctionalTester
 modules:
     enabled:
-        # add a framework module here
+        - \Tests\Helper\Module\App:
+            container: config/container.php
+            routes: config/routes.php
+        - REST:
+            depends: \Tests\Helper\Module\App
         - \Tests\Helper\Functional
