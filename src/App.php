@@ -26,6 +26,7 @@ class App
 {
     public const ENV_DEV = 'dev';
     public const ENV_TEST = 'test';
+    public const ENV_PROD = 'prod';
 
     /**
      * @var ContainerBuilder
