@@ -1,4 +1,4 @@
-version: '3'
+version: '3.1'
 services:
 
     web:
@@ -12,7 +12,34 @@ services:
     php-fpm:
         build:
             context: ./env/docker/php-fpm
+        depends_on:
+            - db
         volumes:
             - ./:/var/www/app
+        secrets:
+            - postgres-password
         environment:
             - APP_ENV=dev
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD_FILE=/run/secrets/postgres-password
+            - POSTGRES_DB=app
+
+    db:
+        image: postgres:10.5
+        ports:
+            - 5432:5432
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
+        secrets:
+            - postgres-password
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD_FILE=/run/secrets/postgres-password
+            - POSTGRES_DB=app
+
+secrets:
+    postgres-password:
+        file: env/docker/postgres/secrets/postgres-password
+
+volumes:
+    postgres-data:
