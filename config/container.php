@@ -42,8 +42,13 @@ $containerBuilder
     ->register('doctrine.config', Configuration::class)
     ->setFactory([Setup::class, 'createAnnotationMetadataConfiguration'])
     ->setArguments([
-        '$paths' => __DIR__.'/../src/Entity',
+        '$paths' => [
+            __DIR__.'/../src/Entity',
+        ],
         '$isDevMode' => getenv('APP_ENV') !== App::ENV_PROD,
+        '$proxyDir' => null,
+        '$cache' => null,
+        '$useSimpleAnnotationReader' => false,
     ]);
 $containerBuilder
     ->register('doctrine.em', EntityManager::class)
@@ -60,6 +65,7 @@ $containerBuilder
             ),
         ],
         '$config' => new Reference('doctrine.config'),
-    ]);
+    ])
+    ->setPublic(true);
 
 return $containerBuilder;
