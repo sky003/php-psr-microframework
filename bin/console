@@ -1,0 +1,36 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types = 1);
+
+use Doctrine\ORM\Tools\Console\ConsoleRunner;
+use Doctrine\ORM\Tools\Console\Helper\EntityManagerHelper;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Helper\HelperSet;
+use Symfony\Component\Console\Input\ArgvInput;
+
+require_once __DIR__.'/../vendor/autoload.php';
+
+$input = new ArgvInput();
+$env = $input->getParameterOption(['--env', '-e'], getenv('APP_ENV') ?? 'dev', true);
+
+// Prepare the service container.
+$containerBuilder = require __DIR__.'/../config/container.php';
+$envContainerBuilderFile = __DIR__.'/../config/container-'.$env.'.php';
+if (file_exists($envContainerBuilderFile)) {
+    require_once $envContainerBuilderFile;
+}
+$containerBuilder->compile();
+
+$cli = new Application('App Command Line Interface', '1.0.0');
+$cli->setCatchExceptions(true);
+
+$cli->setHelperSet(
+    new HelperSet([
+        'em' => new EntityManagerHelper($containerBuilder->get('doctrine.em'))
+    ])
+);
+
+// Register all Doctrine commands.
+ConsoleRunner::addCommands($cli);
+
+$cli->run();
