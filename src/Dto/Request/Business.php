@@ -21,7 +21,7 @@ class Business implements PropertyChangeTrackerInterface
      *     groups={"OpCreate"},
      * )
      * @Assert\NotNull(
-     *     groups={"OpUpdate"},
+     *     groups={"OpUpdate", "OpNormalize"},
      * )
      */
     private $id;
