@@ -87,6 +87,8 @@ class Business implements PropertyChangeTrackerInterface
      */
     public function setId(int $id): Business
     {
+        $this->registerPropertyChanged('id');
+
         $this->id = $id;
 
         return $this;
@@ -107,6 +109,8 @@ class Business implements PropertyChangeTrackerInterface
      */
     public function setName(string $name): Business
     {
+        $this->registerPropertyChanged('name');
+
         $this->name = $name;
 
         return $this;
@@ -127,6 +131,8 @@ class Business implements PropertyChangeTrackerInterface
      */
     public function setConstructionYear(int $constructionYear): Business
     {
+        $this->registerPropertyChanged('constructionYear');
+
         $this->constructionYear = $constructionYear;
 
         return $this;
@@ -147,6 +153,8 @@ class Business implements PropertyChangeTrackerInterface
      */
     public function setClass(int $class): Business
     {
+        $this->registerPropertyChanged('class');
+
         $this->class = $class;
 
         return $this;
@@ -167,6 +175,8 @@ class Business implements PropertyChangeTrackerInterface
      */
     public function setGovernmental(bool $governmental): Business
     {
+        $this->registerPropertyChanged('governmental');
+
         $this->governmental = $governmental;
 
         return $this;
