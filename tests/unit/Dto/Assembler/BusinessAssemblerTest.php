@@ -18,7 +18,7 @@ class BusinessAssemblerTest extends Unit
         $entityManager
             ->expects($this->once())
             ->method('find')
-            ->willReturnCallback(function (int $id, string $className) {
+            ->willReturnCallback(function (string $className, int $id) {
                 if ($className === Entity\Business::class) {
                     return (new Entity\Business())
                         ->setId($id)
@@ -65,7 +65,7 @@ class BusinessAssemblerTest extends Unit
         $entityManager
             ->expects($this->once())
             ->method('find')
-            ->willReturnCallback(function (int $id, string $className) {
+            ->willReturnCallback(function (string $className, int $id) {
                 if ($className === Entity\Business::class) {
                     return (new Entity\Business())
                         ->setId($id)
@@ -111,8 +111,7 @@ class BusinessAssemblerTest extends Unit
             ->setClass(3)
             ->setGovernmental(false);
 
-        /** @var EntityManagerInterface $entityManager */
-        $assembler = new BusinessAssembler($entityManager);
+        $assembler = new BusinessAssembler(null);
         $entity = $assembler->writeEntity($dto);
 
         // The property values received from DTO.
