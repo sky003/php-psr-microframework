@@ -1,4 +1,6 @@
 namespace: Tests
+settings:
+    bootstrap: _bootstrap.php
 paths:
     tests: tests
     output: tests/_output

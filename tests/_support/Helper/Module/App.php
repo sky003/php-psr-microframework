@@ -53,11 +53,7 @@ final class App extends Framework
     private function initializeContainer(): void
     {
         $containerFile = \codecept_root_dir().$this->config['container'];
-        $testContainerFile = str_replace('.php', '', $containerFile).'-'.\App\App::ENV_TEST.'.php';
-        $routesFile = \codecept_root_dir().$this->config['routes'];
 
         $this->container = require $containerFile;
-        require $testContainerFile;
-        require $routesFile;
     }
 }
