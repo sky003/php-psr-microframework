@@ -1,71 +1,33 @@
 <?php
 /**
  * Initializes and builds the service container.
- *
- * This is a part of application's composition root. This definition is common
- * for all environments (dev, test, prod and etc).
  */
 
 declare(strict_types = 1);
 
-use App\App;
-use Doctrine\ORM\Configuration;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Tools\Setup;
-use League\BooBoo\BooBoo;
-use League\BooBoo\Formatter\JsonFormatter;
-use League\Route\Router;
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 
-$containerBuilder = new ContainerBuilder();
+$container = new ContainerBuilder();
 
-// Router
-$containerBuilder
-    ->register('router', Router::class)
-    ->setPublic(true)
-    ->addTag('core');
+$loader = new PhpFileLoader($container, new FileLocator(__DIR__));
+$loader->load('container-common.php');
+$loader->load('routes.php');
 
-// Error handler
-$containerBuilder
-    ->register('booboo.json_formatter', JsonFormatter::class)
-    ->setPublic(true)
-    ->addTag('core');
-$containerBuilder
-    ->register('booboo', BooBoo::class)
-    ->setArgument('$formatters', [new Reference('booboo.json_formatter')])
-    ->setPublic(true)
-    ->addTag('core');
-
-// Doctrine ORM
-$containerBuilder
-    ->register('doctrine.config', Configuration::class)
-    ->setFactory([Setup::class, 'createAnnotationMetadataConfiguration'])
-    ->setArguments([
-        '$paths' => [
-            __DIR__.'/../src/Entity',
-        ],
-        '$isDevMode' => getenv('APP_ENV') !== App::ENV_PROD,
-        '$proxyDir' => null,
-        '$cache' => null,
-        '$useSimpleAnnotationReader' => false,
-    ]);
-$containerBuilder
-    ->register('doctrine.em', EntityManager::class)
-    ->setFactory([EntityManager::class, 'create'])
-    ->setArguments([
-        '$connection' => [
-            'driver' => 'pdo_pgsql',
-            'host' => getenv('POSTGRES_HOST'),
-            'port' => getenv('POSTGRES_PORT'),
-            'dbname' => getenv('POSTGRES_DB'),
-            'user' => getenv('POSTGRES_USER'),
-            'password' => file_get_contents(
-                getenv('POSTGRES_PASSWORD_FILE')
-            ),
-        ],
-        '$config' => new Reference('doctrine.config'),
-    ])
+// Register the application classes as services.
+// All of them available for autoloading and autoconfiguration.
+$definition = new Definition();
+$definition
+    ->setAutowired(true)
+    ->setAutoconfigured(true)
     ->setPublic(true);
+$loader->registerClasses(
+    $definition,
+    'App\\',
+    '../src/*',
+    '../src/{App.php,Entity,Migrations,Tests}'
+);
 
-return $containerBuilder;
+return $container;

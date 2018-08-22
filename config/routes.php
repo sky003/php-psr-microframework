@@ -11,13 +11,20 @@
 declare(strict_types = 1);
 
 use League\Route\RouteGroup;
+use League\Route\Strategy\ApplicationStrategy;
 
 /** @var \League\Route\Router $router */
-$router = $containerBuilder->get('router');
+$router = $container->get('router');
+
+$strategy = new ApplicationStrategy();
+$strategy->setContainer($container);
+$router->setStrategy($strategy);
 
 $router
     ->group('/api/v1', function (RouteGroup $router) {
         $router->map('GET', '/', 'App\Controller\IndexController::getIndex');
+
+        $router->map('POST', '/businesses', 'App\Controller\BusinessController::create');
     });
 
 return $router;
