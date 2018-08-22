@@ -66,7 +66,7 @@ class Business implements PropertyChangeTrackerInterface
     /**
      * @var bool
      *
-     * @Assert\NotBlank(
+     * @Assert\NotNull(
      *     groups={"OpCreate", "OpUpdate"},
      * )
      */
