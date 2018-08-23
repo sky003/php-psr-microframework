@@ -3,6 +3,7 @@ declare(strict_types = 1);
 
 namespace Tests\Functional;
 
+use App\Entity\Business;
 use Tests\FunctionalTester;
 
 class BusinessCest
@@ -51,5 +52,67 @@ class BusinessCest
 
         $I->expect('the request returned an error');
         $I->seeResponseCodeIs(422);
+    }
+
+    public function testUpdate(FunctionalTester $I): void
+    {
+        $entity = new Business();
+        $I->persistEntity($entity, [
+            'name'             => 'Acme',
+            'constructionYear' => new \DateTime('2013-01-01'),
+            'class'            => 1,
+            'governmental'     => false,
+        ]);
+
+        $data = [
+            'name'             => 'New Acme',
+            'constructionYear' => 2017,
+            'governmental'     => false,
+        ];
+
+        $I->wantTo('make sure the business updating works as expected');
+
+        $I->amGoingTo('make a request to the business update action');
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPATCH('/api/v1/businesses/'.$entity->getId(), $data);
+
+        $I->expect('the request successfully handled');
+        $I->seeResponseCodeIs(200);
+        $I->seeResponseMatchesJsonType([
+            'updatedAt' => 'string',
+        ]);
+        $I->seeResponseContainsJson([
+            'id'               => $entity->getId(),
+            'name'             => $data['name'],
+            'constructionYear' => $data['constructionYear'],
+            'class'            => $entity->getClass(),
+            'governmental'     => $data['governmental'],
+        ]);
+    }
+
+    public function testUpdateWithNotValidId(FunctionalTester $I): void
+    {
+        $entity = new Business();
+        $I->persistEntity($entity, [
+            'name'             => 'Acme',
+            'constructionYear' => new \DateTime('2013-01-01'),
+            'class'            => 1,
+            'governmental'     => false,
+        ]);
+
+        $data = [
+            'name'             => 'New Acme',
+            'constructionYear' => 2017,
+            'governmental'     => false,
+        ];
+
+        $I->wantTo('make sure the updating of not existent business will return correct error');
+
+        $I->amGoingTo('make a request to update the business which is definitely not exists');
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPATCH('/api/v1/businesses/'.($entity->getId() + 1000), $data);
+
+        $I->expect('the request returned an error');
+        $I->seeResponseCodeIs(404);
     }
 }
