@@ -62,7 +62,7 @@ $container
         '$useSimpleAnnotationReader' => false,
     ]);
 $container
-    ->register('doctrine.em', EntityManager::class)
+    ->register('doctrine.entity_manager', EntityManager::class)
     ->setFactory([EntityManager::class, 'create'])
     ->setArguments([
         '$connection' => [
@@ -108,6 +108,6 @@ $container
 
 
 // Set the aliases for the proper type-hints.
-$container->setAlias(EntityManagerInterface::class, new Alias('doctrine.em'));
+$container->setAlias(EntityManagerInterface::class, new Alias('doctrine.entity_manager'));
 $container->setAlias(SerializerInterface::class, new Alias('serializer'));
 $container->setAlias(ValidatorInterface::class, new Alias('validator'));
