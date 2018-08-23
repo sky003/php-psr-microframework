@@ -115,4 +115,37 @@ class BusinessCest
         $I->expect('the request returned an error');
         $I->seeResponseCodeIs(404);
     }
+
+    public function testGetList(FunctionalTester $I): void
+    {
+        $I->persistEntity(new Business(), [
+            'name'             => 'Searchable Acme',
+            'constructionYear' => new \DateTime('2008-01-01'),
+            'class'            => 3,
+            'governmental'     => true,
+        ]);
+        $I->persistEntity(new Business(), [
+            'name'             => 'Searchable Acme 2',
+            'constructionYear' => new \DateTime('2009-01-01'),
+            'class'            => 4,
+            'governmental'     => false,
+        ]);
+
+        $I->wantTo('make sure the endpoint to get business list works as expected');
+
+        $I->amGoingTo('make a request to the business update action');
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendGET('/api/v1/businesses?limit=2&q=Searchable');
+
+        $I->expect('the request successfully handled');
+        $I->seeResponseCodeIs(200);
+        $I->seeResponseContainsJson([
+            [
+                'name' => 'Searchable Acme',
+            ],
+            [
+                'name' => 'Searchable Acme 2',
+            ],
+        ]);
+    }
 }
