@@ -3,6 +3,7 @@ declare(strict_types = 1);
 
 namespace App\Dto\Request;
 
+use App\Component\Validator\Constraints as AppAssert;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -21,6 +22,11 @@ class Business implements PropertyChangeTrackerInterface
      *     groups={"OpCreate"},
      * )
      * @Assert\NotNull(
+     *     groups={"OpUpdate", "OpNormalize"},
+     * )
+     * @AppAssert\ExistEntity(
+     *     entityClass="App\Entity\Business",
+     *     properties={"id"},
      *     groups={"OpUpdate", "OpNormalize"},
      * )
      */
