@@ -5,8 +5,10 @@ namespace App\Controller;
 
 use App\Dto\Assembler\BusinessAssemblerInterface;
 use App\Dto\Request;
+use App\Entity\Business;
 use App\Service\Business\BusinessServiceInterface;
 use App\Service\Business\ServiceException;
+use Doctrine\Common\Collections\Criteria;
 use Middlewares\Utils\HttpErrorException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -109,6 +111,7 @@ class BusinessController
      * @param array $args The router variables parsed from the request path.
      *
      * @return ResponseInterface
+     * @throws HttpErrorException
      */
     public function update(ServerRequestInterface $request, array $args): ResponseInterface
     {
@@ -151,6 +154,50 @@ class BusinessController
         $response = new Response();
         $response->getBody()->write(
             $this->serializer->serialize($responseDto, 'json')
+        );
+
+        return $response
+            ->withStatus(200)
+            ->withHeader('Content-Type', 'application/json');
+    }
+
+    /**
+     * Returns the list of businesses.
+     *
+     * @param ServerRequestInterface $request
+     *
+     * @return ResponseInterface
+     * @throws HttpErrorException
+     */
+    public function getList(ServerRequestInterface $request): ResponseInterface
+    {
+        $queryParams = $request->getQueryParams();
+
+        $offset = $queryParams['offset'] ?? 0;
+        $limit = $queryParams['limit'] ?? 25;
+        $searchQuery = $queryParams['q'] ?? null;
+
+        $criteria = Criteria::create()
+            ->setFirstResult($offset)
+            ->setMaxResults($limit);
+        if (!empty($searchQuery)) {
+            // This search is pretty dumb.
+            $criteria->where(Criteria::expr()->contains('name', $searchQuery));
+        }
+
+        try {
+            $collection = $this->businessService->getList($criteria);
+        } catch (ServiceException $e) {
+            throw HttpErrorException::create(500, [], $e);
+        }
+
+        $dtoCollection = $collection->map(function (Business $business) {
+            return $this->businessAssembler->writeDto($business);
+        });
+
+        $response = new Response();
+        $response->getBody()->write(
+            $this->serializer->serialize($dtoCollection, 'json')
         );
 
         return $response
