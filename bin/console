@@ -15,10 +15,6 @@ $env = $input->getParameterOption(['--env', '-e'], getenv('APP_ENV') ?? 'dev', t
 
 // Prepare the service container.
 $containerBuilder = require __DIR__.'/../config/container.php';
-$envContainerBuilderFile = __DIR__.'/../config/container-'.$env.'.php';
-if (file_exists($envContainerBuilderFile)) {
-    require_once $envContainerBuilderFile;
-}
 $containerBuilder->compile();
 
 $cli = new Application('App Command Line Interface', '1.0.0');
@@ -26,7 +22,7 @@ $cli->setCatchExceptions(true);
 
 $cli->setHelperSet(
     new HelperSet([
-        'em' => new EntityManagerHelper($containerBuilder->get('doctrine.em'))
+        'em' => new EntityManagerHelper($containerBuilder->get('doctrine.entity_manager'))
     ])
 );
 
