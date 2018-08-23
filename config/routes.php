@@ -25,6 +25,8 @@ $router
         $router->map('GET', '/', 'App\Controller\IndexController::getIndex');
 
         $router->map('POST', '/businesses', 'App\Controller\BusinessController::create');
+        $router->map('PUT', '/businesses/{id:number}', 'App\Controller\BusinessController::update');
+        $router->map('PATCH', '/businesses/{id:number}', 'App\Controller\BusinessController::update');
     });
 
 return $router;

@@ -99,4 +99,62 @@ class BusinessController
             ->withStatus(201)
             ->withHeader('Content-Type', 'application/json');
     }
+
+    /**
+     * Update the business.
+     *
+     * This method can handle PUT request as well as PATCH request.
+     *
+     * @param ServerRequestInterface $request
+     * @param array $args The router variables parsed from the request path.
+     *
+     * @return ResponseInterface
+     */
+    public function update(ServerRequestInterface $request, array $args): ResponseInterface
+    {
+        /** @var Request\Business $requestDto */
+        $requestDto = $this->serializer->deserialize(
+            $request->getBody()->getContents(),
+            Request\Business::class,
+            'json'
+        );
+
+        $requestDto->setId((int) $args['id']);
+
+        // Validate all input required to normalize provided DTO.
+        // DTO can be safely normalized in case validation has passed.
+        $errors = $this->validator->validate($requestDto, null, ['OpNormalize']);
+        if (\count($errors) > 0) {
+            // That means that the business can not be found (identifier is empty, or not valid)
+            // so DTO can not be normalized.
+            throw HttpErrorException::create(404);
+        }
+
+        $this->businessAssembler->normalizeDto($requestDto);
+
+        // Validate all DTO.
+        $errors = $this->validator->validate($requestDto, null, ['OpUpdate']);
+        if (\count($errors) > 0) {
+            throw HttpErrorException::create(422, ['validationErrors' => $errors]);
+        }
+
+        $entity = $this->businessAssembler->writeEntity($requestDto);
+
+        try {
+            $this->businessService->update($entity);
+        } catch (ServiceException $e) {
+            throw HttpErrorException::create(500, [], $e);
+        }
+
+        $responseDto = $this->businessAssembler->writeDto($entity);
+
+        $response = new Response();
+        $response->getBody()->write(
+            $this->serializer->serialize($responseDto, 'json')
+        );
+
+        return $response
+            ->withStatus(200)
+            ->withHeader('Content-Type', 'application/json');
+    }
 }
