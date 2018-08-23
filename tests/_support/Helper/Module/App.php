@@ -4,7 +4,9 @@ declare(strict_types = 1);
 namespace Tests\Helper\Module;
 
 use Codeception\Lib\Framework;
+use Codeception\Lib\Interfaces\DoctrineProvider;
 use Codeception\TestInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Container\ContainerInterface;
 use Tests\Helper\Module\Connector\App as Connector;
 
@@ -13,9 +15,9 @@ use Tests\Helper\Module\Connector\App as Connector;
  *
  * @author Anton Pelykh <anton.pelykh.dev@gmail.com>
  */
-final class App extends Framework
+final class App extends Framework implements DoctrineProvider
 {
-    protected $requiredFields = ['container', 'routes'];
+    protected $requiredFields = ['container'];
     /**
      * @var ContainerInterface
      */
@@ -39,6 +41,18 @@ final class App extends Framework
     }
 
     /**
+     * Returns the application entity manager.
+     *
+     * @return EntityManagerInterface
+     */
+    public function _getEntityManager(): EntityManagerInterface // phpcs:ignore
+    {
+        $this->initializeContainer();
+
+        return $this->container->get('doctrine.entity_manager');
+    }
+
+    /**
      * Initializes the application.
      */
     private function initializeApp(): void
@@ -53,7 +67,6 @@ final class App extends Framework
     private function initializeContainer(): void
     {
         $containerFile = \codecept_root_dir().$this->config['container'];
-
         $this->container = require $containerFile;
     }
 }

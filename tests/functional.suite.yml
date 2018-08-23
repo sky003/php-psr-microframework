@@ -10,7 +10,9 @@ modules:
     enabled:
         - \Tests\Helper\Module\App:
             container: config/container.php
-            routes: config/routes.php
+        - Doctrine2:
+            depends: \Tests\Helper\Module\App
+            cleanup: false
         - REST:
             depends: \Tests\Helper\Module\App
         - \Tests\Helper\Functional
