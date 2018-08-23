@@ -22,6 +22,7 @@ use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\ContainerConstraintValidatorFactory;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\RecursiveValidator;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -76,7 +77,8 @@ $container
             ),
         ],
         '$config' => new Reference('doctrine.config'),
-    ]);
+    ])
+    ->setPublic(true);
 
 // Serializer
 $container
@@ -99,8 +101,15 @@ $container
 
 // Validator
 $container
+    ->register('validator.container_constraint_validator_factory', ContainerConstraintValidatorFactory::class)
+    ->setArgument('$container', new Reference('service_container'));
+$container
     ->register('validator.builder', ValidatorBuilder::class)
     ->setFactory([Validation::class, 'createValidatorBuilder'])
+    ->addMethodCall(
+        'setConstraintValidatorFactory',
+        ['$validatorFactory' => new Reference('validator.container_constraint_validator_factory')]
+    )
     ->addMethodCall('enableAnnotationMapping');
 $container
     ->register('validator', RecursiveValidator::class)
