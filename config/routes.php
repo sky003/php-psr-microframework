@@ -28,6 +28,7 @@ $router
         $router->map('PUT', '/businesses/{id:number}', 'App\Controller\BusinessController::update');
         $router->map('PATCH', '/businesses/{id:number}', 'App\Controller\BusinessController::update');
         $router->map('GET', '/businesses', 'App\Controller\BusinessController::getList');
+        $router->map('POST', '/businesses/{business_id}/rating', 'App\Controller\RatingController::create');
     });
 
 return $router;
