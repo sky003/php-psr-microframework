@@ -2,6 +2,8 @@
 <?php
 declare(strict_types = 1);
 
+use App\Component\Console\Command\GenerateJwtCommand;
+use App\Component\Console\Command\Helper\JwtHelper;
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
 use Doctrine\ORM\Tools\Console\Helper\EntityManagerHelper;
 use Symfony\Component\Console\Application;
@@ -22,11 +24,14 @@ $cli->setCatchExceptions(true);
 
 $cli->setHelperSet(
     new HelperSet([
-        'em' => new EntityManagerHelper($containerBuilder->get('doctrine.entity_manager'))
+        'em' => new EntityManagerHelper($containerBuilder->get('doctrine.entity_manager')),
+        'jwt' => new JwtHelper($containerBuilder->get('jwt.signer'), $containerBuilder->get('jwt.key')),
     ])
 );
 
 // Register all Doctrine commands.
 ConsoleRunner::addCommands($cli);
+
+$cli->add(new GenerateJwtCommand());
 
 $cli->run();
