@@ -46,7 +46,7 @@ class RatingAssembler implements RatingAssemblerInterface
         }
 
         /** @var Entity\Business $business */
-        $business = $this->entityManager->find(Entity\Rating::class, $dto->getBusinessId());
+        $business = $this->entityManager->find(Entity\Business::class, $dto->getBusinessId());
 
         $entity = new Entity\Rating();
         $entity
