@@ -18,8 +18,10 @@ services:
             - ./:/var/www/app
         secrets:
             - postgres-password
+            - jwt-sign-key
         environment:
             - APP_ENV=dev
+            - APP_JWT_SIGN_KEY_FILE=/run/secrets/jwt-sign-key
             - POSTGRES_HOST=db
             - POSTGRES_PORT=5432
             - POSTGRES_USER=postgres
@@ -42,6 +44,8 @@ services:
 secrets:
     postgres-password:
         file: env/docker/postgres/secrets/postgres-password
+    jwt-sign-key:
+        file: env/docker/php-fpm/secrets/jwt-sign-key
 
 volumes:
     postgres-data:

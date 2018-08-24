@@ -7,10 +7,12 @@
 declare(strict_types = 1);
 
 use App\App;
+use App\Component\Middlewares\JwtAuthMiddleware;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Setup;
+use Lcobucci\JWT\Signer;
 use League\BooBoo\BooBoo;
 use League\BooBoo\Formatter\HtmlFormatter;
 use League\BooBoo\Formatter\JsonFormatter;
@@ -115,8 +117,27 @@ $container
     ->register('validator', RecursiveValidator::class)
     ->setFactory([new Reference('validator.builder'), 'getValidator']);
 
+// JWT Auth
+$container
+    ->register('jwt.signer', Signer\Hmac\Sha256::class)
+    ->setPublic(true);
+$container
+    ->register('jwt.key', Signer\Key::class)
+    ->setArgument('$content', file_get_contents(getenv('APP_JWT_SIGN_KEY_FILE')))
+    ->setPublic(true);
+$container
+    ->register('middleware.jwt_auth_middleware', JwtAuthMiddleware::class)
+    ->setArguments([
+        '$signer' => new Signer\Hmac\Sha256(),
+        '$key' => new Signer\Key(
+            file_get_contents(getenv('APP_JWT_SIGN_KEY_FILE'))
+        ),
+    ])
+    ->setPublic(true);
 
 // Set the aliases for the proper type-hints.
 $container->setAlias(EntityManagerInterface::class, new Alias('doctrine.entity_manager'));
 $container->setAlias(SerializerInterface::class, new Alias('serializer'));
 $container->setAlias(ValidatorInterface::class, new Alias('validator'));
+$container->setAlias(Signer::class, new Alias('jwt.signer'));
+$container->setAlias(Signer\Key::class, new Alias('jwt.key'));
