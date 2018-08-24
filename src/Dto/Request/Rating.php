@@ -27,11 +27,12 @@ class Rating implements PropertyChangeTrackerInterface
      * @var int
      *
      * @Assert\NotBlank(
-     *     groups={"OpCreate"},
+     *     groups={"OpCreate", "OpCheckRequestAttributes"},
      * )
      * @AppAssert\ExistEntity(
      *     entityClass="App\Entity\Business",
      *     properties={"id"},
+     *     groups={"OpCreate", "OpCheckRequestAttributes"},
      * )
      */
     private $businessId;
@@ -44,6 +45,7 @@ class Rating implements PropertyChangeTrackerInterface
      * @Assert\Range(
      *     min=1,
      *     max=5,
+     *     groups={"OpCreate"},
      * )
      */
     private $value;
