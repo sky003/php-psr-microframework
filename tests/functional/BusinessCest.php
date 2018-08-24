@@ -8,6 +8,10 @@ use Tests\FunctionalTester;
 
 class BusinessCest
 {
+    private const VALID_JWT = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.'
+                              .'eyJqdGkiOiJqd3RfNWI3ZmZkNDc2OGVkMDIuMzAwNjExOTQifQ.'
+                              .'yWx6kHmWIM8Blq82LoYt3Pegmm81YH_p4FfEIyawd2c';
+
     public function testCreate(FunctionalTester $I): void
     {
         $data = [
@@ -21,6 +25,7 @@ class BusinessCest
 
         $I->amGoingTo('make a request to the business creation action');
         $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->amBearerAuthenticated(self::VALID_JWT);
         $I->sendPOST('/api/v1/businesses', $data);
 
         $I->expect('the request successfully handled');
@@ -48,6 +53,7 @@ class BusinessCest
 
         $I->amGoingTo('make a request to the business creation action');
         $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->amBearerAuthenticated(self::VALID_JWT);
         $I->sendPOST('/api/v1/businesses', $data);
 
         $I->expect('the request returned an error');
@@ -74,6 +80,7 @@ class BusinessCest
 
         $I->amGoingTo('make a request to the business update action');
         $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->amBearerAuthenticated(self::VALID_JWT);
         $I->sendPATCH('/api/v1/businesses/'.$entity->getId(), $data);
 
         $I->expect('the request successfully handled');
@@ -110,6 +117,7 @@ class BusinessCest
 
         $I->amGoingTo('make a request to update the business which is definitely not exists');
         $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->amBearerAuthenticated(self::VALID_JWT);
         $I->sendPATCH('/api/v1/businesses/'.($entity->getId() + 1000), $data);
 
         $I->expect('the request returned an error');
