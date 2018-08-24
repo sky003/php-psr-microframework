@@ -1,0 +1,217 @@
+openapi: 3.0.0
+info:
+  title: Business API
+  contact: 
+    email: anton.pelykh.dev@gmail.com
+  version: 0.8.0
+paths:
+  /businesses:
+    get:
+      operationId: listBusinesses
+      summary: List all businesses
+      parameters:
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - name: q
+          in: query
+          description: The search query (the search is really dumb).
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The businesses list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Businesses'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    post:
+      operationId: createBusinesses
+      summary: Create a new business
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Business'
+      responses:
+        '201':
+          description: Newly created business
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Business'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  '/businesses/{id}':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The business identifier
+        schema:
+          type: integer
+          format: int64
+    put:
+      operationId: updateBusinesses
+      summary: Update the business with the given id
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: The updated business
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Business'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    patch:
+      operationId: updateBusinessesPartial
+      summary: Partial update of the business with the given id
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: The updated business
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Business'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  '/businesses/{business_id}/rating':
+    parameters:
+      - name: business_id
+        in: path
+        required: true
+        description: The business identifier
+        schema:
+          type: integer
+          format: int64
+    post:
+      operationId: rateBusinesses
+      summary: Rate the business with the given id
+      responses:
+        '200':
+          description: The rating of the business
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rating'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+components:
+  parameters:
+    offsetParam:
+      name: offset
+      in: query
+      required: false
+      schema:
+        type: integer
+        format: int32
+    limitParam:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        format: int32
+  responses:
+    Unauthorized:
+      description: >
+        User authentication failed.
+    UnprocessableEntity:
+      description: >
+        Not valid user input.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServiceUnavailable:
+      description: >
+        Something wrong with the service.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Business:
+      type: object
+      properties:
+        id: 
+          type: integer
+          format: int64
+          readOnly: true
+        name:
+          type: string
+        constructionYear:
+          type: integer
+        class:
+          type: integer
+        governmental:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - id
+        - name
+        - constructionYear
+        - class
+        - governmental
+        - createdAt
+    Businesses:
+      title: Businesses list
+      type: array
+      items:
+        $ref: '#/components/schemas/Business'
+    Rating:
+      type: object
+      properties:
+        id: 
+          type: integer
+          format: int64
+          readOnly: true
+        businessId:
+          type: integer
+          format: int64
+        value:
+          type: integer
+          description: >
+            The rating value from 1-5.
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - id
+        - businessId
+        - value
+        - createdAt
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          readOnly: true
+      required:
+        - message
